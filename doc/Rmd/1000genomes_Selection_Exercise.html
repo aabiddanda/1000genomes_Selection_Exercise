@@ -123,14 +123,7 @@ $(document).ready(function () {
 <h1>1000genomes Selection Exercise</h1>
 <p>To get some exposure to different approaches for detecting recent positive selection from population genetic data, we will be using the 1000 Genomes data. We will present two approaches for detecting recent positive selection. The first is an approach based on differentiation between populations, that uses the PBS (population-branch statistic) to detect selection that occurred in the history of a particular population. The second is an approach based on haplotype patterns - using the iHS statistic. We’ll suppose a particular gene is of interest (whose transcript start/stop is marked with vertical lines below)</p>
 <p>We will interact with the 1000 Genomes data using <code>vcf</code> (variant call format) files. These files have one line per variant, and contain information about each individual’s genotype as columns. These files are so large they are most often kept in a <code>gzip</code> compressed format, which you will recognize usually by seeing a filename that ends with <code>.vcf.gz</code>.</p>
-<p>Before anything, we need to set up a unix-based analysis environment with the appropriate programs:</p>
-<ul>
-<li><code>tabix</code>: For quickly retrieving specific lines from a <code>.vcf.gz</code> file. It creates an index of a <code>.vcf.gz</code> file and then uses the index to quickly find the lines a user requests.</li>
-<li><code>bcftools</code>: For manipulating <code>vcf</code> files. Here we use it for some basic filtering.</li>
-<li><code>plink2</code> / <code>plink-1.9</code>: Second-generation of the multi-faceted <code>plink</code> tool. It facilitates a number of common analyses in statistical genetics and population genetics. Here we use it to compute <span class="math inline">\(F_{ST}\)</span> which we will need to compute the PBS statistic. We assume you will run it using the command <code>plink2</code>.</li>
-<li><code>selscan</code>: For computing haplotype-based statistics that are sensitive to signatures of selective sweeps (EHH, iHS, XP-EHH, nSL, for example)</li>
-<li><code>norm</code>: A program from the <code>selscan</code> package that will normalize iHS or XP-EHH values.</li>
-</ul>
+<p>Before anything, we need to set up a unix-based analysis environment with the appropriate programs: * <code>tabix</code>: For quickly retrieving specific lines from a <code>.vcf.gz</code> file. It creates an index of a <code>.vcf.gz</code> file and then uses the index to quickly find the lines a user requests. * <code>bcftools</code>: For manipulating <code>vcf</code> files. Here we use it for some basic filtering. * <code>plink2</code> / <code>plink-1.9</code>: Second-generation of the multi-faceted <code>plink</code> tool. It facilitates a number of common analyses in statistical genetics and population genetics. Here we use it to compute <span class="math inline">\(F_{ST}\)</span> which we will need to compute the PBS statistic. We assume you will run it using the command <code>plink2</code>. * <code>selscan</code>: For computing haplotype-based statistics that are sensitive to signatures of selective sweeps (EHH, iHS, XP-EHH, nSL, for example) * <code>norm</code>: A program from the <code>selscan</code> package that will normalize iHS or XP-EHH values.</p>
 <p>We have included an appendix, titled “Setting up your environment” that contains the appropriate instructions for installing these. For the moment, we assume you have gone through this, or are using an account on a server that has been pre-configured for you, and so we will jump right into some analysis. To be sure, check and see if the list of programs above can be found in a ‘bin/’ subdirectory of the main project directory here.</p>
 <p>As a disclaimer, in what follows - we take an approach that builds intuition and take some shortcuts to make analyses feasible in a classroom setting. For publishable results, more rigor to assess the statistical significance of results is necessary than what we show here.</p>
 <div id="preparing-files-that-describe-the-1000-genomes-individuals" class="section level3">
@@ -196,8 +189,8 @@ plink2 --vcf snv_1000genomes_$tag.vcf.gz \
 awk '$9&lt;1e-5{print $2}' tmp_fin.hwe tmp_chb.hwe tmp_yri.hwe | sort | uniq &gt; tmp.exclude.txt
 
 # Filter out HW failures 
-bcftools view snv_1000genomes_$tag.vcf.gz --exclude 'ID=@tmp.exclude.txt' -O z &gt; snv_1000genomes_${tag}_HWEfiltered.vcf.gz
-</code></pre>
+bcftools view snv_1000genomes_$tag.vcf.gz \
+  --exclude 'ID=@tmp.exclude.txt' -O z &gt; snv_1000genomes_${tag}_HWEfiltered.vcf.gz</code></pre>
 <p>We filtered out SNPs based on a criteria of <span class="math inline">\(p&lt;10^{-5}\)</span>, where the p-values were calculated using an exact test of Hardy-Weinberg equilibrium. Note that a more rigorous appraoch is to conduct a <span class="math inline">\(\chi^2\)</span> test for the joint set of genotype counts for each sub-population (in this case a 5 degree of freedom test).</p>
 </div>
 <div id="population-differentation-based-selection-scan" class="section level2">

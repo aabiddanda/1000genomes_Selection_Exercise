@@ -16,7 +16,6 @@ To get some exposure to different approaches for detecting recent positive selec
 We will interact with the 1000 Genomes data using `vcf` (variant call format) files.  These files have one line per variant, and contain information about each individual's genotype as columns. These files are so large they are most often kept in a `gzip` compressed format, which you will recognize usually by seeing a filename that ends with `.vcf.gz`.  
 
 Before anything, we need to set up a unix-based analysis environment with the appropriate programs:
-
 * `tabix`: For quickly retrieving specific lines from a `.vcf.gz` file.  It creates an index of a `.vcf.gz` file and then uses the index to quickly find the lines a user requests.
 * `bcftools`: For manipulating `vcf` files.  Here we use it for some basic filtering.
 * `plink2` / `plink-1.9`: Second-generation of the multi-faceted `plink` tool.  It facilitates a number of common analyses in statistical genetics and population genetics.  Here we use it to compute $F_{ST}$ which we will need to compute the PBS statistic.  We assume you will run it using the command `plink2`. 
@@ -113,8 +112,8 @@ plink2 --vcf snv_1000genomes_$tag.vcf.gz \
 awk '$9<1e-5{print $2}' tmp_fin.hwe tmp_chb.hwe tmp_yri.hwe | sort | uniq > tmp.exclude.txt
 
 # Filter out HW failures 
-bcftools view snv_1000genomes_$tag.vcf.gz --exclude 'ID=@tmp.exclude.txt' -O z > snv_1000genomes_${tag}_HWEfiltered.vcf.gz
-
+bcftools view snv_1000genomes_$tag.vcf.gz \
+  --exclude 'ID=@tmp.exclude.txt' -O z > snv_1000genomes_${tag}_HWEfiltered.vcf.gz
 ```
 
 We filtered out SNPs based on a criteria of $p<10^{-5}$, where the p-values were calculated using an exact test of Hardy-Weinberg equilibrium. Note that a more rigorous appraoch is to conduct a $\chi^2$ test for the joint set of genotype counts for each sub-population (in this case a 5 degree of freedom test).
